@@ -64,7 +64,7 @@ namespace ariel
                 
             
         }
-        int NumberWithUnits::is_Type(const NumberWithUnits& aUnit,const NumberWithUnits& bUnit) const{
+        int is_Type(const NumberWithUnits& aUnit,const NumberWithUnits& bUnit){
 
                 string a = aUnit.type();
                 string b = bUnit.type();
@@ -80,42 +80,62 @@ namespace ariel
                 }
      
         }
-        NumberWithUnits NumberWithUnits::unitConvertor(const NumberWithUnits& toUnit, const NumberWithUnits& fromUnit) const{
-
+        NumberWithUnits unitConvertor(const NumberWithUnits& toUnit, const NumberWithUnits& fromUnit) {
+                //cout << "CONVERT" << endl;
                 if (is_Type(toUnit,fromUnit))
-                {
+                {       
+                        //cout << "SAME" << endl;
                         return fromUnit;
                 }else{
-                        double value = fromUnit.amount()*(UnitsToUnits[fromUnit.type()][toUnit.type()]);
+                        //cout << "CHANGE UNIT" << endl;
+                        double value = fromUnit.amount()*(NumberWithUnits::UnitsToUnits[fromUnit.type()][toUnit.type()]);
+                        //cout << "NEW UNIT " << afor << endl;
                         return NumberWithUnits(value,toUnit.type());
                 }
                 
         }
 
 
-        NumberWithUnits& NumberWithUnits::operator +(const NumberWithUnits& unit){
-
-                (this->_amount) = (this->_amount) + unitConvertor(*this,unit).amount();
-                return *this;
+        NumberWithUnits operator +(const NumberWithUnits& unitA,const NumberWithUnits& unitB){
+                cout << "operator +  " << endl;
+                // cout << "BEFORE This is :" << *this << "  With : " << unit << endl;
+                // (this->_amount) = (this->_amount) + unitConvertor(*this,unit).amount();
+                // cout << "AFTER This is :" << *this << "  With : " << unit << endl;
+                double value = (unitA.amount()) + unitConvertor(unitA,unitB).amount();
+                return NumberWithUnits(value, unitA.type());
+                // return *this;
         }
         NumberWithUnits& NumberWithUnits::operator +=(const NumberWithUnits& unit){
-                return (*this) + unit;
+                cout << "This is :" << *this << "  With : " << unit << endl;
+                cout << "operator +=  " << endl;
+                this->_amount += unitConvertor(*this,unit).amount();
+                return (*this);
         }
         //-------------------------------------
-        NumberWithUnits& NumberWithUnits::operator -(const NumberWithUnits& unit){
-                (this->_amount) = (this->_amount) - unitConvertor(*this,unit).amount();
-                return *this;
+        NumberWithUnits operator -(const NumberWithUnits& unitA,const NumberWithUnits& unitB){
+                cout << "operator -  " << endl;
+                // cout << "BEFORE This is :" << *this << "  With : " << unit << endl;
+                // (this->_amount) = (this->_amount) - unitConvertor(*this,unit).amount();
+                // cout << "AFTER This is :" << *this << "  With : " << unit << endl;
+                double value = (unitA.amount()) - unitConvertor(unitA,unitB).amount();
+                return NumberWithUnits(value, unitA.type());
+                // return *this;
         }
         NumberWithUnits& NumberWithUnits::operator -=(const NumberWithUnits& unit){
-                return (*this) - unit;
+                cout << "This is :" << *this << "  With : " << unit << endl;
+                cout << "operator -=  " << endl;
+                this->_amount -= unitConvertor(*this,unit).amount();
+                return (*this);
         }
 
 
         bool NumberWithUnits::operator ==(const NumberWithUnits& unit) const {
                 
+                
                 if (is_Type(*this,unit)){
-
-                        return (abs( this->_amount - unit.amount()) <= TOLERANCE);
+                        
+                        return (abs( this->_amount - unit.amount()) <= TOLERANCE) ||
+                        (this->_amount - unit.amount()) == 0;
 
                 } else {
                         
@@ -127,23 +147,30 @@ namespace ariel
                 return !((*this) == (unit));
         }
         bool NumberWithUnits::operator <(const NumberWithUnits& unit) const{
+                
                 if(is_Type(*this,unit)){
-                        return (this->_amount - unit.amount()) < TOLERANCE;
+                        
+                        return (this->_amount < unit.amount());
                 }else{
                         return *this < unitConvertor(*this,unit);
                 }
         }
         bool NumberWithUnits::operator <=(const NumberWithUnits& unit) const{
+
                 return !(*this > unit);
         }
         bool NumberWithUnits::operator >(const NumberWithUnits& unit) const{
+                
                 if(is_Type(*this,unit)){
-                        return (this->_amount - unit.amount()) > TOLERANCE;
+                       
+                        return (this->_amount > unit.amount());
                 }else{
-                        return *this < unitConvertor(*this,unit);
+                        
+                        return (*this > unitConvertor(*this,unit));
                 }
         }
         bool NumberWithUnits::operator >=(const NumberWithUnits& unit) const{
+                
                 return !(*this < unit);
         }
 
@@ -161,36 +188,30 @@ namespace ariel
 
         }
 
-        static istream& getAndCheckNextCharIs(istream& input, char expectedChar) {
-        char actualChar;
-        input >> actualChar;
-        if (!input) {return input;}
-
-        if (actualChar!=expectedChar) {
-                input.setstate(ios::failbit);   // failbit is for format error
-        }
-        return input;
-        }
-
         std::istream& operator >> (istream& input, NumberWithUnits& unit_R){
 
                 double new_amount = 0;
                 string new_type;
                 
+                char dummyLeft;
+                char dummyRight;
                 ios::pos_type startPosition = input.tellg();
 
-                skipws(input);
-
-                if ( (!(input >> new_amount))             ||
-                (!getAndCheckNextCharIs(input,'['))       ||
-                (!(input >> new_type))                    ||
-                (!(getAndCheckNextCharIs(input,']'))) ) {
+                
+                input >> skipws >> new_amount >> dummyLeft >> new_type >> dummyRight;
+                if(new_type.at(new_type.length() - 1) == ']'){
+                        new_type = new_type.substr(0, new_type.length() - 1);
+                }
+                if ( NumberWithUnits::UnitsToUnits.find(new_type) ==
+                NumberWithUnits::UnitsToUnits.end() ) {
 
                                                         // rewind on error
                 auto errorState = input.rdstate();      // remember error state
                 input.clear();                          // clear error so seekg will work
                 input.seekg(startPosition);             // rewind
                 input.clear(errorState);                // set back the error flag
+
+                throw invalid_argument("Not A Familiar Type  "+new_type);
 
                 } else {
                 unit_R._amount = new_amount;
