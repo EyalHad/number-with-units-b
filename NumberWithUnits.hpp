@@ -35,26 +35,21 @@ namespace ariel {
         //-------------------------------------
 
         //-------------------------------------
+        NumberWithUnits unitConvertor(const NumberWithUnits& unit);
         int is_Type(const NumberWithUnits& aType, const NumberWithUnits& bType) const;
         NumberWithUnits unitConvertor(const NumberWithUnits& toUnit, const NumberWithUnits& fromUnit) const;
         //-------------------------------------
         friend NumberWithUnits operator*(const NumberWithUnits& unit,double val);
         friend NumberWithUnits operator*(double val, const NumberWithUnits& unit);
         //-------------------------------------          
-        friend NumberWithUnits operator +(const NumberWithUnits& unitA, const NumberWithUnits& unitB);
+        NumberWithUnits operator +(const NumberWithUnits& unit);
         NumberWithUnits& operator +=(const NumberWithUnits& unit);
         //-------------------------------------
-        friend NumberWithUnits operator -(const NumberWithUnits& unitA, const NumberWithUnits& unitB);
+        NumberWithUnits operator -(const NumberWithUnits& unit);
         NumberWithUnits& operator -=(const NumberWithUnits& unit);
         //-------------------------------------
-        NumberWithUnits& operator-(){
-            this->_amount *= (-1);
-            return *this;
-        }
-        NumberWithUnits& operator+(){
-            this->_amount *= (+1);
-            return *this;
-        }      
+        NumberWithUnits operator-(){ return NumberWithUnits(-_amount,_type);}
+        NumberWithUnits operator+(){ return NumberWithUnits(+_amount,_type);}        
         //-------------------------------------
 
 
