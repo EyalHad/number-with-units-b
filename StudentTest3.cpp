@@ -48,10 +48,10 @@ TEST_CASE("Equal function unconnected type")
     NumberWithUnits u19{3.33, "r_ILS"}; //1 dolar
     NumberWithUnits u22{6, "r_USD"};
 
-    CHECK_THROWS(u12.operator==(u5));
-    CHECK_THROWS(u5.operator==(u12));
-    CHECK_THROWS(u22.operator==(u1));
-    CHECK_THROWS(u19.operator==(u18));
+    CHECK_THROWS(t=(u12==u5));
+    CHECK_THROWS(t=(u5==u12));
+    CHECK_THROWS(t=(u22==u1));
+    CHECK_THROWS(t=(u19==u18));
 }
 
 TEST_CASE("not equal function")
