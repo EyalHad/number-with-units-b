@@ -35,7 +35,6 @@ namespace ariel {
         //-------------------------------------
 
         //-------------------------------------
-        NumberWithUnits unitConvertor(const NumberWithUnits& unit);
         int is_Type(const NumberWithUnits& aType, const NumberWithUnits& bType) const;
         NumberWithUnits unitConvertor(const NumberWithUnits& toUnit, const NumberWithUnits& fromUnit) const;
         //-------------------------------------
