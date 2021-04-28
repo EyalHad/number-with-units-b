@@ -96,38 +96,27 @@ namespace ariel
         }
 
 
-        NumberWithUnits NumberWithUnits::operator +(const NumberWithUnits& unit){
-                cout << "operator +  " << endl;
-                cout << "BEFORE This is :" << *this << "  With : " << unit << endl;
-                (this->_amount) = (this->_amount) + unitConvertor(*this,unit).amount();
-                cout << "AFTER This is :" << *this << "  With : " << unit << endl;
-                return *this;
+        NumberWithUnits NumberWithUnits::operator +(const NumberWithUnits& unit) const{
+                double value = (this->_amount) + unitConvertor(*this,unit).amount();
+                return NumberWithUnits(value,this->_type);
         }
         NumberWithUnits& NumberWithUnits::operator +=(const NumberWithUnits& unit){
-                cout << "This is :" << *this << "  With : " << unit << endl;
-                cout << "operator +=  " << endl;
                 this->_amount += unitConvertor(*this,unit).amount();
                 return (*this);
         }
         //-------------------------------------
-        NumberWithUnits NumberWithUnits::operator -(const NumberWithUnits& unit){
-                cout << "operator -  " << endl;
-                cout << "BEFORE This is :" << *this << "  With : " << unit << endl;
-                (this->_amount) = (this->_amount) - unitConvertor(*this,unit).amount();
-                cout << "AFTER This is :" << *this << "  With : " << unit << endl;
-                return *this;
+        NumberWithUnits NumberWithUnits::operator -(const NumberWithUnits& unit) const{
+                double value = (this->_amount) - unitConvertor(*this,unit).amount();
+                return NumberWithUnits(value,this->_type);
         }
         NumberWithUnits& NumberWithUnits::operator -=(const NumberWithUnits& unit){
-                cout << "This is :" << *this << "  With : " << unit << endl;
-                cout << "operator -=  " << endl;
                 this->_amount -= unitConvertor(*this,unit).amount();
                 return (*this);
         }
 
 
         bool NumberWithUnits::operator ==(const NumberWithUnits& unit) const {
-                
-                
+                        
                 if (is_Type(*this,unit)){
                         
                         return (abs( this->_amount - unit.amount()) <= TOLERANCE) ||
@@ -144,12 +133,7 @@ namespace ariel
         }
         bool NumberWithUnits::operator <(const NumberWithUnits& unit) const{
                 
-                if(is_Type(*this,unit)){
-                        
-                        return (this->_amount < unit.amount());
-                }else{
-                        return *this < unitConvertor(*this,unit);
-                }
+                return unit > *this;
         }
         bool NumberWithUnits::operator <=(const NumberWithUnits& unit) const{
 
@@ -159,7 +143,7 @@ namespace ariel
                 
                 if(is_Type(*this,unit)){
                        
-                        return (this->_amount > unit.amount());
+                        return (this->_amount - unit.amount()) > TOLERANCE;
                 }else{
                         
                         return (*this > unitConvertor(*this,unit));
@@ -187,28 +171,37 @@ namespace ariel
         std::istream& operator >> (istream& input, NumberWithUnits& unit_R){
 
                 string dummy;
-                input >> skipws >> dummy;
-                unsigned int i = 0;
-                string unit;
-                while (dummy.at(i) != '[' && i < dummy.length())
+                string tmp;
+                getline(input , dummy, ']');
+                for (size_t i = 0; i < dummy.length(); i++)
                 {
-                        unit.append(i,dummy.at(i));
-                        i++;
+                        if (dummy[i] != ' '){tmp += dummy[i];}        
                 }
-                i++;
-                double value = stod(unit);
+                dummy = tmp;
+
                 string type;
-                unsigned int j = 0;
-                while (dummy.at(i) != ']' && i < dummy.length())
+                double value = 0;
+                string valD;
+
+                for (size_t i = 0; i < dummy.length(); i++)
                 {
-                        type.append(j,dummy.at(i));
-                        i++;
-                        j++;
+                        if (dummy[i] == ']' || dummy[i] == '['){continue;}
+                        else if (('0' <= dummy[i] && dummy[i] <= '9') ||
+                        '+' == dummy[i] ||
+                        '-' == dummy[i] ||
+                        '.' == dummy[i]){
+                                valD += dummy[i];
+                        }
+                        else if ('A' <= dummy[i] && dummy[i] <= 'z')
+                        {
+                                type += dummy[i];
+                        }
                 }
-                if (NumberWithUnits::UnitsToUnits.find(type) == NumberWithUnits::UnitsToUnits.end())
-                {
-                        throw invalid_argument("Not Good Type Not Familiar"+type);
-                }
+    
+                if (NumberWithUnits::UnitsToUnits.find(type) == 
+                NumberWithUnits::UnitsToUnits.end()){ throw invalid_argument("Not My Type"); }
+                
+                value = stod(valD);
 
                 unit_R._amount = value;
                 unit_R._type = type;

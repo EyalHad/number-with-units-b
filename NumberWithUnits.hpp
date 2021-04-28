@@ -42,10 +42,10 @@ namespace ariel {
         friend NumberWithUnits operator*(const NumberWithUnits& unit,double val);
         friend NumberWithUnits operator*(double val, const NumberWithUnits& unit);
         //-------------------------------------          
-        NumberWithUnits operator +(const NumberWithUnits& unit);
+        NumberWithUnits operator +(const NumberWithUnits& unit) const;
         NumberWithUnits& operator +=(const NumberWithUnits& unit);
         //-------------------------------------
-        NumberWithUnits operator -(const NumberWithUnits& unit);
+        NumberWithUnits operator -(const NumberWithUnits& unit) const;
         NumberWithUnits& operator -=(const NumberWithUnits& unit);
         //-------------------------------------
         NumberWithUnits operator-(){ return NumberWithUnits(-_amount,_type);}
@@ -92,7 +92,7 @@ namespace ariel {
         // friend global IO operators
         //-------------------------------------
         friend ostream& operator << (ostream& os, const NumberWithUnits& unit_R);
-        friend istream& operator >> (istream& is, NumberWithUnits& unit_R);
+        friend istream& operator >> (istream& input, NumberWithUnits& unit_R);
         //-------------------------------------
     };
 
